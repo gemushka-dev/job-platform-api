@@ -1,5 +1,16 @@
 const { pool } = require("./pool");
 
+const allowedFields = [
+  "full_name",
+  "sur_name",
+  "description",
+  "avatar",
+  "company_name",
+  "project_link_1",
+  "project_link_2",
+  "project_link_3",
+];
+
 class Database {
   constructor() {}
 
@@ -66,16 +77,36 @@ class Database {
   }
 
   async getAllWorkers() {
-    return await pool.query(
+    const result = await pool.query(
       `SELECT worker_id, full_name, sur_name, email, birth_date, description, avatar, created_at FROM workers`
     );
+    return result.rows;
   }
 
   async getWorkersById(value) {
-    return await pool.query(
+    const result = await pool.query(
       `SELECT worker_id, full_name, sur_name, email, birth_date, description, avatar, created_at FROM workers WHERE worker_id = $1`,
       [value]
     );
+    return result.rows[0];
+  }
+
+  async getWorkerByEmailJWT(value) {
+    const result = await pool.query(`SELECT * FROM workers WHERE email = $1`, [
+      value,
+    ]);
+    return result.rows[0];
+  }
+
+  async updateWorkerByID(value, field, id) {
+    if (allowedFields.includes(field)) {
+      const result = await pool.query(
+        `UPDATE workers SET ${field} = $1 WHERE worker_id = $2 RETURNING *`,
+        [value, id]
+      );
+      return result.rows[0];
+    }
+    return "Invalid Field";
   }
 
   async createWorker({
@@ -87,34 +118,60 @@ class Database {
     description,
     avatar,
   }) {
-    return await pool.query(
+    const result = await pool.query(
       `INSERT INTO workers(full_name,sur_name,email,password,birth_date,description,avatar) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
       [fullName, surName, email, password, birthDate, description, avatar]
     );
+    return result.rows[0];
   }
 
   async getAllCompanies() {
-    return await pool.query(
+    const result = await pool.query(
       `SELECT company_id ,company_name ,email ,description, created_at  FROM companies`
     );
+    return result.rows;
   }
 
   async getCompanyById(value) {
-    return await pool.query(
+    const result = await pool.query(
       `SELECT company_id ,company_name ,email ,description, created_at FROM companies WHERE company_id  = $1`,
       [value]
     );
+    return result.rows[0];
+  }
+
+  async getCompanyByEmailJWT(value) {
+    const result = await pool.query(
+      `SELECT * FROM companies WHERE email = $1`,
+      [value]
+    );
+    return result.rows[0];
+  }
+
+  async updateCompanyByID(value, field, id) {
+    if (allowedFields.includes(field)) {
+      const result = await pool.query(
+        `UPDATE companies SET ${field} = $1 WHERE company_id = $2 RETURNING *`,
+        [value, id]
+      );
+      return result.rows[0];
+    }
+    return "Invalid Field";
   }
 
   async createCompany({ companyName, email, password, description }) {
-    return await pool.query(
+    const result = await pool.query(
       `INSERT INTO companies(company_name , email , password , description) VALUES($1,$2,$3,$4) RETURNING *`,
       [companyName, email, password, description]
     );
+    return result.rows[0];
   }
 
   async getCardById(value) {
-    return await pool.query(`SELECT * FROM jobs WHERE job_id = $1`, [value]);
+    const result = await pool.query(`SELECT * FROM jobs WHERE job_id = $1`, [
+      value,
+    ]);
+    return result.rows[0];
   }
 }
 
