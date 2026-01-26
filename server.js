@@ -5,6 +5,7 @@ const cors = require("cors");
 const { database } = require("./database/initialization");
 
 const { workersRouter } = require("./workers/workersRouter");
+const { companiesRouter } = require("./companies/companiesRouter");
 
 const PORT = 3500;
 const app = express();
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use("/workers", workersRouter);
+app.use("/companies", companiesRouter);
 
 async function start() {
   try {
