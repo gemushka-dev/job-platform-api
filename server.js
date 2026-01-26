@@ -6,6 +6,7 @@ const { database } = require("./database/initialization");
 
 const { workersRouter } = require("./workers/workersRouter");
 const { companiesRouter } = require("./companies/companiesRouter");
+const { jobCardsRouter } = require("./jobs/jobsRouter");
 
 const PORT = 3500;
 const app = express();
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 });
 app.use("/workers", workersRouter);
 app.use("/companies", companiesRouter);
+app.use("/jobs", jobCardsRouter);
 
 async function start() {
   try {
