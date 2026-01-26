@@ -11,7 +11,7 @@ module.exports.getWorkerById = async (req, res) => {
     const worker = await workersService.getWorkerByID(id);
     res.status(200).json(worker);
   } catch (e) {
-    res.status(404).send("Not Found");
+    res.status(404).json({ message: "Not Found" });
     console.error(`[ERROR] ${e.message}`);
   }
 };
@@ -26,10 +26,13 @@ module.exports.createWorker = async (req, res) => {
   } catch (e) {
     switch (e.message) {
       case "User already exists":
-        res.status(409).send("User already exists");
+        res.status(409).json({ message: e.message });
+        break;
+      case "Bad Request":
+        res.status(400).json({ message: e.message });
         break;
       default:
-        res.status(400).send("Bad Request");
+        res.status(500).json({ message: "Internal Server Error" });
     }
     console.error(`[ERROR] ${e.message}`);
   }
@@ -50,10 +53,13 @@ module.exports.loginWorker = async (req, res) => {
   } catch (e) {
     switch (e.message) {
       case "There is no such user":
-        res.status(404).send(e.message);
+        res.status(404).json({ message: e.message });
+        break;
+      case "Incorrect password":
+        res.status(400).json({ message: e.message });
         break;
       default:
-        res.status(400).send(e.message);
+        res.status(500).json({ message: "Internal Server Error" });
         break;
     }
     console.error(`[ERROR] ${e.message}`);
@@ -69,7 +75,7 @@ module.exports.updateWorker = async (req, res) => {
     const update = req.body;
     res.status(200).json(await workersService.updateWorker(workerId, update));
   } catch (e) {
-    res.status(400).send("Bad Request");
+    res.status(400).json({ message: "Bad Request" });
     console.error(`[ERROR] ${e.message}`);
   }
 };

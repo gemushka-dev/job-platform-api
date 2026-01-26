@@ -5,7 +5,7 @@ const multer = require("multer");
 const workerController = require("./workersController");
 const { auth } = require("../auth/authMiddleware");
 
-const uploads = multer({ dest: path.resolve("uploads/") });
+const uploads = require("../multer/multerSettings");
 
 const workersRouter = Router();
 
@@ -21,7 +21,7 @@ workersRouter.post(
 
 workersRouter.post("/login", workerController.loginWorker);
 
-workersRouter.post(
+workersRouter.patch(
   "/me",
   uploads.single("avatar"),
   auth,
