@@ -8,6 +8,7 @@ const { workersRouter } = require("./workers/workersRouter");
 const { companiesRouter } = require("./companies/companiesRouter");
 const { jobCardsRouter } = require("./jobs/jobsRouter");
 const { applicationRouter } = require("./applications/applicationRouter");
+const errorMiddleware = require("./error/errorMiddleware");
 
 const PORT = 3500;
 const app = express();
@@ -30,6 +31,7 @@ app.use("/workers", workersRouter);
 app.use("/companies", companiesRouter);
 app.use("/jobs", jobCardsRouter);
 app.use("/applications", applicationRouter);
+app.use(errorMiddleware);
 
 async function start() {
   try {
