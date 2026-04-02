@@ -5,18 +5,17 @@ module.exports.getAllWorkers = async (req, res) => {
   res.status(200).json(workers);
 };
 
-module.exports.getWorkerById = async (req, res) => {
+module.exports.getWorkerById = async (req, res, next) => {
   try {
     const id = req.params.id;
     const worker = await workersService.getWorkerByID(id);
     res.status(200).json(worker);
   } catch (e) {
-    res.status(404).json({ message: "Not Found" });
-    console.error(`[ERROR] ${e.message}`);
+    next(e);
   }
 };
 
-module.exports.createWorker = async (req, res) => {
+module.exports.createWorker = async (req, res, next) => {
   try {
     const user = req.body;
     user.avatar = req.file?.filename || "default_img.jpg";
@@ -24,21 +23,11 @@ module.exports.createWorker = async (req, res) => {
     res.status(201).json(mes);
     console.log(`[CREATED] worker`);
   } catch (e) {
-    switch (e.message) {
-      case "User already exists":
-        res.status(409).json({ message: e.message });
-        break;
-      case "Bad Request":
-        res.status(400).json({ message: e.message });
-        break;
-      default:
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-    console.error(`[ERROR] ${e.message}`);
+    next(e);
   }
 };
 
-module.exports.loginWorker = async (req, res) => {
+module.exports.loginWorker = async (req, res, next) => {
   try {
     const user = req.body;
     const JWT = await workersService.login(user);
@@ -51,31 +40,19 @@ module.exports.loginWorker = async (req, res) => {
     });
     res.status(200).json({ message: "Logged in" });
   } catch (e) {
-    switch (e.message) {
-      case "There is no such user":
-        res.status(404).json({ message: e.message });
-        break;
-      case "Incorrect password":
-        res.status(400).json({ message: e.message });
-        break;
-      default:
-        res.status(500).json({ message: "Internal Server Error" });
-        break;
-    }
-    console.error(`[ERROR] ${e.message}`);
+    next(e);
   }
 };
 
-module.exports.updateWorker = async (req, res) => {
+module.exports.updateWorker = async (req, res, next) => {
   try {
     if (req.user?.role !== "worker") {
-      return res.status(403).send("Forbidden");
+      throw new Error("Forbidden");
     }
     const workerId = req.user.id;
     const update = req.body;
     res.status(200).json(await workersService.updateWorker(workerId, update));
   } catch (e) {
-    res.status(400).json({ message: "Bad Request" });
-    console.error(`[ERROR] ${e.message}`);
+    next(e);
   }
 };

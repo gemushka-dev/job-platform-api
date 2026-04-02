@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const path = require("path");
+const HttpError = require("../error/httpError");
 
 const workersRepo = require("./workersRepository");
 
@@ -20,22 +21,18 @@ module.exports.getAllWorkers = async () => {
 module.exports.getWorkerByID = async (id) => {
   const worker = await workersRepo.getWorkerById(id);
   if (!worker || !worker.email) {
-    throw new Error("Worker not found");
+    throw new HttpError("Worker not found", 404);
   }
   return worker;
 };
 
 module.exports.register = async (user) => {
-  if (!user?.email || !user?.password || !user?.fullName) {
-    throw new Error("Bad Request");
-  }
-
   const worker = await workersRepo.getWorkerJWT(user.email);
   if (worker) {
     if (user.avatar != "default_img.jpg") {
       await fs.promises.unlink(path.resolve("uploads", user.avatar));
     }
-    throw new Error("User already exists");
+    throw new HttpError("User already exists", 409);
   }
 
   const hashed_password = await bcrypt.hash(user.password, 10);
@@ -55,17 +52,14 @@ module.exports.register = async (user) => {
 
 module.exports.login = async (user) => {
   const { password, email } = user;
-  if (!password || !email) {
-    throw new Error("Bad Request");
-  }
   const registredWorker = await workersRepo.getWorkerJWT(email);
   if (!registredWorker) {
-    throw new Error("There is no such user");
+    throw new HttpError("There is no such user", 401);
   }
   const valid = await bcrypt.compare(password, registredWorker.password);
 
   if (!valid) {
-    throw new Error("Incorrect password");
+    throw new HttpError("Incorrect password", 401);
   }
   const payload = {
     id: registredWorker.worker_id,
