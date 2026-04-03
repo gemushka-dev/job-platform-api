@@ -124,3 +124,39 @@ module.exports.companiesUpdateValidation = (req, res, next) => {
     next(e);
   }
 };
+
+const jobsCreateSchema = z.object({
+  jobName: z.string({ message: "Incorrect jobName type" }).max(64),
+  skills: z.string({ message: "Incorrect jobName type" }).min(16),
+  projectLink1: z.string({ message: "Incorrect jobName type" }).optional(),
+  projectLink2: z.string({ message: "Incorrect jobName type" }).optional(),
+  projectLink3: z.string({ message: "Incorrect jobName type" }).optional(),
+});
+
+const jobsUpdateSchema = z.object({
+  jobName: z.string({ message: "Incorrect jobName type" }).max(64).optional(),
+  skills: z.string({ message: "Incorrect jobName type" }).optional(),
+  projectLink1: z.string({ message: "Incorrect jobName type" }).optional(),
+  projectLink2: z.string({ message: "Incorrect jobName type" }).optional(),
+  projectLink3: z.string({ message: "Incorrect jobName type" }).optional(),
+});
+
+module.exports.jobsCreateValidation = (req, res, next) => {
+  try {
+    const validatedData = jobsCreateSchema.parse(req.body);
+    req.body = validatedData;
+    next();
+  } catch (e) {
+    next(e);
+  }
+};
+
+module.exports.jobsUpdateValidation = (req, res, next) => {
+  try {
+    const validatedData = jobsUpdateSchema.parse(req.body);
+    req.body = validatedData;
+    next();
+  } catch (e) {
+    next(e);
+  }
+};
