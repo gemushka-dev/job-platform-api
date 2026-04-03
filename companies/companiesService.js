@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const companiesRepo = require("./companiesRepository");
+const HttpError = require("../error/httpError");
 
 const allowedFields = {
   companyName: "company_name",
@@ -22,13 +23,9 @@ module.exports.getCompanyById = async (id) => {
 };
 
 module.exports.register = async (company) => {
-  if (!company?.email || !company?.password || !company?.companyName) {
-    throw new Error("Bad Request");
-  }
-
   const registredCompany = await companiesRepo.getCompanyJWT(company.email);
   if (registredCompany) {
-    throw new Error("User already exists");
+    throw new HttpError("User already exists", 409);
   }
 
   const hashedPassword = await bcrypt.hash(company.password, 10);
@@ -45,16 +42,13 @@ module.exports.register = async (company) => {
 
 module.exports.login = async (company) => {
   const { password, email } = company;
-  if (!password || !email) {
-    throw new Error("Bad Request");
-  }
   const registredCompany = await companiesRepo.getCompanyJWT(email);
   if (!registredCompany) {
-    throw new Error("There is no such user");
+    throw new HttpError("There is no such user", 401);
   }
   const valid = await bcrypt.compare(password, registredCompany.password);
   if (!valid) {
-    throw new Error("Incorrect password");
+    throw new HttpError("Incorrect password", 401);
   }
   const payload = {
     id: registredCompany.company_id,

@@ -1,7 +1,13 @@
 const { Router } = require("express");
-const path = require("path");
 const { auth } = require("../auth/authMiddleware");
+
 const companiesController = require("./companiesController");
+
+const {
+  companiesRegisterValidation,
+  companiesLoginValidation,
+  companiesUpdateValidation,
+} = require("../validation/validationMiddleware");
 
 const companiesRouter = Router();
 
@@ -9,10 +15,23 @@ companiesRouter.get("/", companiesController.getAllCompanies);
 
 companiesRouter.get("/:id", companiesController.getCompanyById);
 
-companiesRouter.post("/register", companiesController.createCompany);
+companiesRouter.post(
+  "/register",
+  companiesRegisterValidation,
+  companiesController.createCompany,
+);
 
-companiesRouter.post("/login", companiesController.loginCompany);
+companiesRouter.post(
+  "/login",
+  companiesLoginValidation,
+  companiesController.loginCompany,
+);
 
-companiesRouter.patch("/me", auth, companiesController.updateCompany);
+companiesRouter.patch(
+  "/me",
+  auth,
+  companiesUpdateValidation,
+  companiesController.updateCompany,
+);
 
 module.exports.companiesRouter = companiesRouter;
