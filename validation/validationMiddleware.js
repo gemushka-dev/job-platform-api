@@ -10,6 +10,7 @@ const workerRegisterSchema = z.object({
     .min(3, { message: "surName must be at least 3 characters long" })
     .max(64),
   email: z.email({ message: "Incorrect email type" }),
+  birthDate: z.string(),
   password: z
     .string({ message: "Incorrect password type" })
     .min(8, { message: "password must be at least 8 characters long" }),
