@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const HttpError = require("../error/httpError");
 const jobsRepo = require("./jobsRepository");
 
 const allowedFields = {
@@ -15,7 +16,7 @@ module.exports.getAllJobCards = async () => await jobsRepo.getAllJobCards();
 module.exports.getJobCardById = async (id) => {
   const jobCard = await jobsRepo.getJobCardById(id);
   if (!jobCard?.job_name) {
-    throw new Error("Not Found");
+    throw new HttpError("Not Found", 404);
   }
   return jobCard;
 };
@@ -23,11 +24,11 @@ module.exports.getJobCardById = async (id) => {
 module.exports.createJobCard = async (jobCard, payload) => {
   const createdJobCard = await jobsRepo.getJobCardByWorker(payload.id);
   if (createdJobCard?.job_id) {
-    throw new Error("Worker already have job card");
+    throw new HttpError("Worker already have job card", 400);
   }
 
   if (payload?.role !== "worker") {
-    throw new Error("Forbidden");
+    throw new HttpError("Forbidden", 403);
   }
 
   const newJobCard = {
@@ -40,12 +41,12 @@ module.exports.createJobCard = async (jobCard, payload) => {
   };
   console.log(newJobCard);
   const result = await jobsRepo.createJobCard(newJobCard);
-  return { message: "Job Card created" };
+  return { message: "Job Card created", job: result };
 };
 
 module.exports.updateJobCard = async (payload, update) => {
   if (payload?.role !== "worker") {
-    throw new Error("Forbidden");
+    throw new HttpError("Forbidden", 403);
   }
   for (const key in allowedFields) {
     if (
